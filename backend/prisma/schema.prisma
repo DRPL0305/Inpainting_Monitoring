@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String   // ADMIN, VIEWER
+  status    String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt DateTime @default(now())
+}
+
+model UserAuth {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  role        String    // ADMIN, VIEWER
+  name        String
+  resetToken  String?
+  resetExpiry DateTime?
+}
+
+model Asset {
+  id              String   @id // Asset ID e.g. INPAINT_001
+  title           String
+  duration        Float    @default(0.0)
+  status          String   @default("PENDING") // PENDING, COMPLETED, IN_PROGRESS
+  doneTimestamp   String?  // Done timestamp string e.g. 2026-09-11 10:30:00
+  language        String   @default("English")
+  exportTimestamp String?  // Export timestamp string e.g. 2026-09-11 11:00:00
+  filePath        String?
+  fileSize        String?
+  resolution      String?  @default("1920x1080")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([language])
+}
+
+model Logo {
+  id         Int      @id @default(autoincrement())
+  fileName   String
+  filePath   String
+  mimeType   String
+  fileSize   Int
+  uploadedBy String
+  createdAt  DateTime @default(now())
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  timestamp String
+  userId    String
+  userName  String
+  userRole  String
+  action    String
+  details   String
+  createdAt DateTime @default(now())
+}

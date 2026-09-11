@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: inpainting_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Umya1234
+      POSTGRES_DB: inpainting_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_inpainting_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inpainting_backend
+    restart: always
+    ports:
+      - "7016:3001"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:Umya1234@db:5432/inpainting_db?schema=public
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:7016/api
+    container_name: inpainting_frontend
+    restart: always
+    ports:
+      - "7017:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_inpainting_data:
