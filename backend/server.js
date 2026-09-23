@@ -11,7 +11,7 @@ import logRoutes from './src/routes/log.routes.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3006;
 
 // CORS setup
 app.use(cors());

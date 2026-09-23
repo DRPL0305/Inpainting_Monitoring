@@ -15,11 +15,11 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
   const [formData, setFormData] = useState<Partial<Asset>>({
     id: '',
     title: '',
+    logoType: 'Watermark',
+    logoId: 'LOGO_001',
     duration: 0,
     status: 'PENDING',
-    language: 'English',
-    doneTimestamp: '',
-    exportTimestamp: ''
+    doneTimestamp: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,21 +29,21 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
       setFormData({
         id: asset.id,
         title: asset.title,
+        logoType: asset.logoType || 'Watermark',
+        logoId: asset.logoId || 'LOGO_001',
         duration: asset.duration,
         status: asset.status,
-        language: asset.language,
-        doneTimestamp: asset.doneTimestamp || '',
-        exportTimestamp: asset.exportTimestamp || ''
+        doneTimestamp: asset.doneTimestamp || ''
       });
     } else {
       setFormData({
         id: '',
         title: '',
+        logoType: 'Watermark',
+        logoId: 'LOGO_001',
         duration: 0,
         status: 'PENDING',
-        language: 'English',
-        doneTimestamp: '',
-        exportTimestamp: ''
+        doneTimestamp: ''
       });
     }
     setError('');
@@ -105,14 +105,15 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Language</label>
-              <input
-                type="text"
-                value={formData.language}
-                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                placeholder="e.g. English"
+              <label className="block text-xs font-medium text-slate-400 mb-1">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
-              />
+              >
+                <option value="PENDING">PENDING</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
             </div>
           </div>
 
@@ -129,6 +130,29 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
 
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1">Logo Type</label>
+              <input
+                type="text"
+                value={formData.logoType || ''}
+                onChange={(e) => setFormData({ ...formData, logoType: e.target.value })}
+                placeholder="e.g. Channel Logo"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1">Logo ID</label>
+              <input
+                type="text"
+                value={formData.logoId || ''}
+                onChange={(e) => setFormData({ ...formData, logoId: e.target.value })}
+                placeholder="e.g. LOGO_101"
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">Duration (Seconds)</label>
               <input
                 type="number"
@@ -139,37 +163,12 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
-              >
-                <option value="PENDING">PENDING</option>
-                <option value="IN_PROGRESS">IN_PROGRESS</option>
-                <option value="COMPLETED">COMPLETED</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">Done Timestamp</label>
               <input
                 type="text"
                 value={formData.doneTimestamp || ''}
                 onChange={(e) => setFormData({ ...formData, doneTimestamp: e.target.value })}
                 placeholder="2026-09-11 10:30:00"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Export Timestamp</label>
-              <input
-                type="text"
-                value={formData.exportTimestamp || ''}
-                onChange={(e) => setFormData({ ...formData, exportTimestamp: e.target.value })}
-                placeholder="2026-09-11 11:00:00"
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
               />
             </div>

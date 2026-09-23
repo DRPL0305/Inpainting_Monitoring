@@ -61,7 +61,9 @@ async function main() {
     {
       id: 'INP_1001',
       title: 'Movie_Scene_01_Inpaint.mp4',
-      duration: 120.5,
+      logoType: 'Channel Logo',
+      logoId: 'LOGO_101',
+      duration: 7200.0, // 2 hours
       status: 'COMPLETED',
       doneTimestamp: '2026-09-10 14:30:00',
       language: 'English',
@@ -73,7 +75,9 @@ async function main() {
     {
       id: 'INP_1002',
       title: 'Commercial_Ad_Hindi.mp4',
-      duration: 45.0,
+      logoType: 'Watermark',
+      logoId: 'LOGO_102',
+      duration: 1800.0, // 0.5 hours
       status: 'PENDING',
       doneTimestamp: null,
       language: 'Hindi',
@@ -85,9 +89,11 @@ async function main() {
     {
       id: 'INP_1003',
       title: 'Documentary_Ep02_Cleanup.mp4',
-      duration: 310.2,
-      status: 'IN_PROGRESS',
-      doneTimestamp: null,
+      logoType: 'Network Bug',
+      logoId: 'LOGO_103',
+      duration: 5400.0, // 1.5 hours
+      status: 'COMPLETED',
+      doneTimestamp: '2026-09-11 11:20:00',
       language: 'Spanish',
       exportTimestamp: null,
       filePath: '/videos/Documentary_Ep02_Cleanup.mp4',
@@ -97,7 +103,9 @@ async function main() {
     {
       id: 'INP_1004',
       title: 'Sports_Highlight_Logo_Remove.mp4',
-      duration: 85.4,
+      logoType: 'Sponsor Banner',
+      logoId: 'LOGO_104',
+      duration: 2400.0, // 0.67 hours
       status: 'PENDING',
       doneTimestamp: null,
       language: 'English',
@@ -109,7 +117,9 @@ async function main() {
     {
       id: 'INP_1005',
       title: 'Drama_Series_Pt1.mp4',
-      duration: 240.0,
+      logoType: 'Channel Logo',
+      logoId: 'LOGO_105',
+      duration: 9000.0, // 2.5 hours
       status: 'COMPLETED',
       doneTimestamp: '2026-09-11 09:15:00',
       language: 'Portuguese',

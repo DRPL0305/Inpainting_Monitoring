@@ -12,13 +12,20 @@ router.get('/stats', authenticateToken, async (req, res) => {
     const totalAssets = await prisma.asset.count();
     const pendingAssets = await prisma.asset.count({ where: { status: 'PENDING' } });
     const completedAssets = await prisma.asset.count({ where: { status: 'COMPLETED' } });
-    const inProgressAssets = await prisma.asset.count({ where: { status: 'IN_PROGRESS' } });
+
+    // Sum duration of completed assets
+    const completedAssetsList = await prisma.asset.findMany({
+      where: { status: 'COMPLETED' },
+      select: { duration: true }
+    });
+    const totalCompletedSeconds = completedAssetsList.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+    const completedHours = parseFloat((totalCompletedSeconds / 3600).toFixed(2));
 
     res.json({
       totalAssets,
-      pendingAssets,
       completedAssets,
-      inProgressAssets
+      pendingAssets,
+      completedHours
     });
   } catch (err) {
     console.error('Error fetching asset stats:', err);
@@ -29,19 +36,18 @@ router.get('/stats', authenticateToken, async (req, res) => {
 // GET /api/assets - List all assets with filtering & search
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const { status, language, search } = req.query;
+    const { status, search } = req.query;
 
     const where = {};
     if (status && status !== 'ALL') {
       where.status = status;
     }
-    if (language && language !== 'ALL') {
-      where.language = language;
-    }
     if (search) {
       where.OR = [
         { id: { contains: search, mode: 'insensitive' } },
-        { title: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search, mode: 'insensitive' } },
+        { logoType: { contains: search, mode: 'insensitive' } },
+        { logoId: { contains: search, mode: 'insensitive' } }
       ];
     }
 
@@ -60,7 +66,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/assets - Create new Asset
 router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
   try {
-    const { id, title, duration, status, doneTimestamp, language, exportTimestamp, filePath, fileSize, resolution } = req.body;
+    const { id, title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution } = req.body;
 
     if (!id || !title) {
       return res.status(400).json({ error: 'Asset ID and title are required' });
@@ -75,11 +81,11 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) =>
       data: {
         id,
         title,
+        logoType: logoType || 'Watermark',
+        logoId: logoId || 'LOGO_001',
         duration: duration ? parseFloat(duration) : 0,
         status: status || 'PENDING',
         doneTimestamp: doneTimestamp || null,
-        language: language || 'English',
-        exportTimestamp: exportTimestamp || null,
         filePath: filePath || null,
         fileSize: fileSize || null,
         resolution: resolution || '1920x1080'
@@ -101,11 +107,11 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) =>
   }
 });
 
-// PATCH /api/assets/:id - Update Asset (status, done timestamp, export timestamp)
+// PATCH /api/assets/:id - Update Asset
 router.patch('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, duration, status, doneTimestamp, language, exportTimestamp, filePath, fileSize, resolution } = req.body;
+    const { title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution } = req.body;
 
     const existing = await prisma.asset.findUnique({ where: { id } });
     if (!existing) {
@@ -114,11 +120,11 @@ router.patch('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req, res
 
     const updatedData = {};
     if (title !== undefined) updatedData.title = title;
+    if (logoType !== undefined) updatedData.logoType = logoType;
+    if (logoId !== undefined) updatedData.logoId = logoId;
     if (duration !== undefined) updatedData.duration = parseFloat(duration);
     if (status !== undefined) updatedData.status = status;
     if (doneTimestamp !== undefined) updatedData.doneTimestamp = doneTimestamp;
-    if (language !== undefined) updatedData.language = language;
-    if (exportTimestamp !== undefined) updatedData.exportTimestamp = exportTimestamp;
     if (filePath !== undefined) updatedData.filePath = filePath;
     if (fileSize !== undefined) updatedData.fileSize = fileSize;
     if (resolution !== undefined) updatedData.resolution = resolution;

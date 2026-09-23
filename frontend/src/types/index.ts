@@ -17,16 +17,18 @@ export interface AuthUser {
 export interface Asset {
   id: string;
   title: string;
+  logoType?: string | null;
+  logoId?: string | null;
   duration: number;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  status: 'PENDING' | 'COMPLETED';
   doneTimestamp?: string | null;
-  language: string;
+  language?: string | null;
   exportTimestamp?: string | null;
   filePath?: string | null;
   fileSize?: string | null;
   resolution?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Logo {
@@ -52,7 +54,7 @@ export interface ActivityLog {
 
 export interface AssetStats {
   totalAssets: number;
-  pendingAssets: number;
+  pendingAssets?: number;
   completedAssets: number;
-  inProgressAssets: number;
+  completedHours: number;
 }

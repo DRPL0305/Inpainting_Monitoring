@@ -11,30 +11,34 @@ import {
   Database,
   Clock,
   CheckCircle2,
-  Play,
   Plus,
   Search,
-  Filter,
   RefreshCw,
-  Edit2,
-  Trash2,
   Film,
-  Globe
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Tag,
+  BadgeCheck
 } from 'lucide-react';
+
+type SortField = 'id' | 'title' | 'logoType' | 'logoId' | 'duration' | 'status' | 'doneTimestamp';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [stats, setStats] = useState<AssetStats>({
     totalAssets: 0,
-    pendingAssets: 0,
     completedAssets: 0,
-    inProgressAssets: 0,
+    completedHours: 0,
   });
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [languageFilter, setLanguageFilter] = useState('ALL');
+
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>('id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Modals state
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
@@ -55,7 +59,7 @@ export default function DashboardPage() {
       }
     }
     fetchDashboardData();
-  }, [statusFilter, languageFilter]);
+  }, [statusFilter]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -67,7 +71,6 @@ export default function DashboardPage() {
       // Fetch assets list
       const params: any = {};
       if (statusFilter !== 'ALL') params.status = statusFilter;
-      if (languageFilter !== 'ALL') params.language = languageFilter;
       if (search) params.search = search;
 
       const assetsRes = await api.get('/assets', { params });
@@ -82,6 +85,15 @@ export default function DashboardPage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchDashboardData();
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
   };
 
   const handleSaveAsset = async (assetData: Partial<Asset>) => {
@@ -107,9 +119,25 @@ export default function DashboardPage() {
     }
   };
 
-  const languages = Array.from(new Set(['English', 'Hindi', 'Spanish', 'Portuguese', ...assets.map((a) => a.language)]));
+  // Sort assets client-side
+  const sortedAssets = [...assets].sort((a, b) => {
+    if (!sortField) return 0;
+    let valA = a[sortField] ?? '';
+    let valB = b[sortField] ?? '';
 
-  // Stat cards config matching DRPL design
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return sortDirection === 'asc' ? valA - valB : valB - valA;
+    }
+
+    valA = String(valA).toLowerCase();
+    valB = String(valB).toLowerCase();
+
+    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Top 3 Metric Cards config
   const statCards = [
     {
       label: 'TOTAL ASSETS',
@@ -119,27 +147,31 @@ export default function DashboardPage() {
       iconBg: 'bg-blue-500/10 border-blue-500/20',
     },
     {
-      label: 'IN PROGRESS',
-      value: stats.inProgressAssets,
-      icon: Play,
-      color: 'text-cyan-400',
-      iconBg: 'bg-cyan-500/10 border-cyan-500/20',
-    },
-    {
-      label: 'PENDING',
-      value: stats.pendingAssets,
-      icon: Clock,
-      color: 'text-amber-400',
-      iconBg: 'bg-amber-500/10 border-amber-500/20',
-    },
-    {
       label: 'COMPLETED',
       value: stats.completedAssets,
       icon: CheckCircle2,
       color: 'text-emerald-400',
       iconBg: 'bg-emerald-500/10 border-emerald-500/20',
     },
+    {
+      label: 'AMOUNT OF CONTENT HOURS COMPLETED',
+      value: `${stats.completedHours ?? 0} hrs`,
+      icon: Clock,
+      color: 'text-cyan-400',
+      iconBg: 'bg-cyan-500/10 border-cyan-500/20',
+    },
   ];
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-3 h-3 text-slate-600 opacity-60 group-hover:opacity-100" />;
+    }
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="w-3 h-3 text-blue-400 font-bold" />
+    ) : (
+      <ArrowDown className="w-3 h-3 text-blue-400 font-bold" />
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -155,7 +187,9 @@ export default function DashboardPage() {
                 <Database className="w-5 h-5 text-blue-400" />
                 Asset Registry
               </h1>
-              <p className="text-xs text-slate-400 mt-1">Track inpainting assets, monitor processing pipeline, and review timestamps</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Track inpainting assets, logo metadata, and processing metrics
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -165,23 +199,11 @@ export default function DashboardPage() {
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
-              {user?.role === 'ADMIN' && (
-                <button
-                  onClick={() => {
-                    setEditingAsset(null);
-                    setIsAssetModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-lg shadow-blue-600/20 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Asset</span>
-                </button>
-              )}
             </div>
           </div>
 
-          {/* 4 Metric Stat Cards - Horizontal Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* 3 Metric Stat Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {statCards.map((card) => {
               const Icon = card.icon;
               return (
@@ -191,7 +213,9 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{card.label}</p>
-                    <div className={`w-8 h-8 rounded-lg ${card.iconBg} border flex items-center justify-center ${card.color} group-hover:scale-110 transition-transform`}>
+                    <div
+                      className={`w-8 h-8 rounded-lg ${card.iconBg} border flex items-center justify-center ${card.color} group-hover:scale-110 transition-transform`}
+                    >
                       <Icon className="w-4 h-4" />
                     </div>
                   </div>
@@ -204,7 +228,7 @@ export default function DashboardPage() {
           {/* Asset count + Filters & Search Toolbar */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">{assets.length} assets</span>
+              <span className="text-xs font-semibold text-slate-400">{sortedAssets.length} assets</span>
               <button
                 onClick={fetchDashboardData}
                 className="text-[10px] font-semibold text-blue-400 hover:text-blue-300 cursor-pointer flex items-center gap-1"
@@ -214,11 +238,11 @@ export default function DashboardPage() {
             </div>
 
             <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3">
-              <form onSubmit={handleSearchSubmit} className="relative w-full md:w-72">
+              <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search by ID, title..."
+                  placeholder="Search by ID, title, logo type, logo ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
@@ -235,24 +259,7 @@ export default function DashboardPage() {
                   >
                     <option value="ALL">All</option>
                     <option value="PENDING">Pending</option>
-                    <option value="IN_PROGRESS">In Progress</option>
                     <option value="COMPLETED">Completed</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Language</span>
-                  <select
-                    value={languageFilter}
-                    onChange={(e) => setLanguageFilter(e.target.value)}
-                    className="px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
-                  >
-                    <option value="ALL">All</option>
-                    {languages.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {lang}
-                      </option>
-                    ))}
                   </select>
                 </div>
               </div>
@@ -260,87 +267,133 @@ export default function DashboardPage() {
           </div>
 
           {/* Assets Data Table */}
-          <div className="bg-card border border-card-border rounded-xl overflow-hidden">
+          <div className="bg-card border border-card-border rounded-xl overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-300">
                 <thead className="bg-slate-950/80 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-800">
                   <tr>
-                    <th className="py-3 px-5">Asset ID</th>
-                    <th className="py-3 px-5">Title</th>
-                    <th className="py-3 px-5">Duration</th>
-                    <th className="py-3 px-5">Language</th>
-                    <th className="py-3 px-5">Status</th>
-                    <th className="py-3 px-5">Done Timestamp</th>
-                    <th className="py-3 px-5">Export Timestamp</th>
-                    {user?.role === 'ADMIN' && <th className="py-3 px-5 text-right">Actions</th>}
+                    <th
+                      onClick={() => handleSort('id')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Asset ID</span>
+                        {renderSortIcon('id')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('title')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Title</span>
+                        {renderSortIcon('title')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('logoType')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Logo Type</span>
+                        {renderSortIcon('logoType')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('logoId')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Logo ID</span>
+                        {renderSortIcon('logoId')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('duration')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Duration</span>
+                        {renderSortIcon('duration')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('status')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Status</span>
+                        {renderSortIcon('status')}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleSort('doneTimestamp')}
+                      className="py-3.5 px-5 cursor-pointer hover:text-slate-200 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Done Timestamp</span>
+                        {renderSortIcon('doneTimestamp')}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500">
+                      <td colSpan={7} className="py-12 text-center text-slate-500">
                         <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-500" />
                         <span className="text-xs">Loading inpainting assets...</span>
                       </td>
                     </tr>
-                  ) : assets.length === 0 ? (
+                  ) : sortedAssets.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500 text-xs">
+                      <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
                         No inpainting assets found.
                       </td>
                     </tr>
                   ) : (
-                    assets.map((asset) => (
+                    sortedAssets.map((asset) => (
                       <tr key={asset.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-5 font-mono font-semibold text-blue-400 text-xs">{asset.id}</td>
-                        <td className="py-3 px-5 font-medium text-slate-200 text-xs">
+                        <td className="py-3.5 px-5 font-mono font-semibold text-blue-400 text-xs">{asset.id}</td>
+                        <td className="py-3.5 px-5 font-medium text-slate-200 text-xs">
                           <div className="flex items-center gap-2">
                             <Film className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                             <span className="truncate max-w-xs">{asset.title}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-5 text-slate-400 font-mono text-[11px]">{asset.duration}s</td>
-                        <td className="py-3 px-5 text-[11px] text-slate-300">{asset.language}</td>
-                        <td className="py-3 px-5">
+                        <td className="py-3.5 px-5 text-xs text-slate-300">
+                          <span className="inline-flex items-center gap-1 bg-slate-950/60 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
+                            <Tag className="w-3 h-3 text-cyan-400" />
+                            {asset.logoType || 'Watermark'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-5 font-mono text-[11px] text-slate-400">
+                          <span className="bg-slate-950/60 px-2 py-0.5 rounded border border-slate-800">
+                            {asset.logoId || 'LOGO_001'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-5 text-slate-400 font-mono text-[11px]">
+                          {asset.duration}s
+                        </td>
+                        <td className="py-3.5 px-5">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                               asset.status === 'COMPLETED'
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : asset.status === 'IN_PROGRESS'
-                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                 : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             }`}
                           >
-                            {asset.status === 'COMPLETED' ? 'Completed' : asset.status === 'IN_PROGRESS' ? 'In Progress' : 'Pending'}
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                asset.status === 'COMPLETED' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                              }`}
+                            />
+                            {asset.status === 'COMPLETED' ? 'Completed' : 'Pending'}
                           </span>
                         </td>
-                        <td className="py-3 px-5 text-[11px] text-slate-400 font-mono">
+                        <td className="py-3.5 px-5 text-[11px] text-slate-400 font-mono">
                           {asset.doneTimestamp || <span className="text-slate-600">—</span>}
                         </td>
-                        <td className="py-3 px-5 text-[11px] text-slate-400 font-mono">
-                          {asset.exportTimestamp || <span className="text-slate-600">—</span>}
-                        </td>
-                        {user?.role === 'ADMIN' && (
-                          <td className="py-3 px-5 text-right space-x-1">
-                            <button
-                              onClick={() => {
-                                setEditingAsset(asset);
-                                setIsAssetModalOpen(true);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
-                              title="Edit Asset"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteModal({ isOpen: true, asset })}
-                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                              title="Delete Asset"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        )}
                       </tr>
                     ))
                   )}
@@ -351,19 +404,11 @@ export default function DashboardPage() {
             {/* Footer count */}
             <div className="px-5 py-3 border-t border-slate-800 flex items-center justify-between">
               <span className="text-[11px] text-slate-500">
-                Showing 1 – {assets.length} of {assets.length} entries
+                Showing 1 – {sortedAssets.length} of {sortedAssets.length} entries
               </span>
             </div>
           </div>
         </main>
-
-        {/* Asset Create/Edit Modal */}
-        <AssetModal
-          isOpen={isAssetModalOpen}
-          onClose={() => setIsAssetModalOpen(false)}
-          onSave={handleSaveAsset}
-          asset={editingAsset}
-        />
 
         {/* Asset Delete Confirmation Modal */}
         <ConfirmDeleteModal

@@ -106,7 +106,7 @@ export default function LogosPage() {
 
   const getFullImageUrl = (pathStr: string) => {
     if (pathStr.startsWith('http')) return pathStr;
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3006/api';
     return `${baseUrl.replace('/api', '')}${pathStr}`;
   };
 
