@@ -25,6 +25,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
+      - PORT=3001
       - DATABASE_URL=postgresql://postgres:Umya1234@db:5432/inpainting_db?schema=public
     volumes:
       - ./backend/uploads:/app/uploads

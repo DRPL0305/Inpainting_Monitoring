@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { AuthUser } from '@/types';
 
-export default function Header() {
+function HeaderContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -291,5 +291,19 @@ export default function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+export default function Header() {
+  return (
+    <Suspense fallback={
+      <header className="fixed left-20 right-0 top-0 z-20 flex h-16 items-center justify-between border-b border-card-border bg-card/80 px-6 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500 font-medium text-xs sm:text-sm">Inpainting Asset</span>
+        </div>
+      </header>
+    }>
+      <HeaderContent />
+    </Suspense>
   );
 }
