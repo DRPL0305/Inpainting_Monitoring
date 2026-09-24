@@ -49,13 +49,16 @@ model Asset {
 }
 
 model Logo {
-  id         Int      @id @default(autoincrement())
-  fileName   String
-  filePath   String
-  mimeType   String
-  fileSize   Int
-  uploadedBy String
-  createdAt  DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  channelName String   @default("General")
+  fileName    String
+  filePath    String
+  mimeType    String
+  fileSize    Int
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+
+  @@index([channelName])
 }
 
 model ActivityLog {

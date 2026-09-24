@@ -41,10 +41,17 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-// GET /api/logos - List all logos
+// GET /api/logos - List all logos (optional filtering by channel)
 router.get('/', authenticateToken, async (req, res) => {
   try {
+    const { channel } = req.query;
+    const where = {};
+    if (channel && channel !== 'ALL') {
+      where.channelName = channel;
+    }
+
     const logos = await prisma.logo.findMany({
+      where,
       orderBy: { createdAt: 'desc' }
     });
     res.json(logos);
@@ -54,17 +61,19 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/logos - Upload logo image
+// POST /api/logos/upload - Upload logo image
 router.post('/upload', authenticateToken, authorizeRoles('ADMIN'), upload.single('logo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file uploaded' });
     }
 
+    const channelName = req.body.channelName || 'Sony MAX';
     const fileUrl = `/uploads/logos/${req.file.filename}`;
 
     const newLogo = await prisma.logo.create({
       data: {
+        channelName,
         fileName: req.file.originalname,
         filePath: fileUrl,
         mimeType: req.file.mimetype,
@@ -78,7 +87,7 @@ router.post('/upload', authenticateToken, authorizeRoles('ADMIN'), upload.single
       userName: req.user.name,
       userRole: req.user.role,
       action: 'UPLOAD_LOGO',
-      details: `Uploaded logo ${req.file.originalname} (${(req.file.size / 1024).toFixed(1)} KB)`
+      details: `Uploaded logo ${req.file.originalname} for channel ${channelName} (${(req.file.size / 1024).toFixed(1)} KB)`
     });
 
     res.status(201).json(newLogo);

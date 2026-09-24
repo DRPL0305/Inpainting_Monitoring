@@ -33,6 +33,7 @@ export interface Asset {
 
 export interface Logo {
   id: number;
+  channelName?: string;
   fileName: string;
   filePath: string;
   mimeType: string;
