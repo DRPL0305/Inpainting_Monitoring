@@ -56,27 +56,6 @@ export default function LoginPage() {
               Secure role-based dashboard for monitoring inpainting pipelines, logo management, asset tracking, and export status review.
             </p>
           </div>
-
-          {/* Demo Credentials */}
-          <div className="mt-8 space-y-3">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Available Accounts</div>
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex flex-col text-left p-3 rounded-xl border border-slate-800 bg-slate-950/40">
-                <div className="flex items-center gap-2 mb-1">
-                  <Mail className="h-4 w-4 text-blue-400" />
-                  <span className="font-bold text-xs text-blue-400">Admin</span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-mono">admin@inpainting.com / Admin@1234</span>
-              </div>
-              <div className="flex flex-col text-left p-3 rounded-xl border border-slate-800 bg-slate-950/40">
-                <div className="flex items-center gap-2 mb-1">
-                  <Eye className="h-4 w-4 text-emerald-400" />
-                  <span className="font-bold text-xs text-emerald-400">Viewer</span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-mono">viewer@inpainting.com / Viewer@1234</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Side: Login Form */}
@@ -97,7 +76,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="email"
-                placeholder="admin@inpainting.com"
+                placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
