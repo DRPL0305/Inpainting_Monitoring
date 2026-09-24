@@ -128,27 +128,15 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Logo Type</label>
-              <input
-                type="text"
-                value={formData.logoType || ''}
-                onChange={(e) => setFormData({ ...formData, logoType: e.target.value })}
-                placeholder="e.g. Channel Logo"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Logo ID</label>
-              <input
-                type="text"
-                value={formData.logoId || ''}
-                onChange={(e) => setFormData({ ...formData, logoId: e.target.value })}
-                placeholder="e.g. LOGO_101"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Logo ID</label>
+            <input
+              type="text"
+              value={formData.logoId || ''}
+              onChange={(e) => setFormData({ ...formData, logoId: e.target.value })}
+              placeholder="e.g. LOGO_101"
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
