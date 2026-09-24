@@ -45,15 +45,23 @@ const upload = multer({
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const { channel } = req.query;
-    const where = {};
-    if (channel && channel !== 'ALL') {
-      where.channelName = channel;
+    let logos = [];
+    try {
+      const where = {};
+      if (channel && channel !== 'ALL') {
+        where.channelName = channel;
+      }
+      logos = await prisma.logo.findMany({
+        where,
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch (dbErr) {
+      // Fallback if production database column channelName has not been added via prisma db push yet
+      logos = await prisma.logo.findMany({
+        orderBy: { createdAt: 'desc' }
+      });
+      logos = logos.map((l) => ({ ...l, channelName: l.channelName || 'General' }));
     }
-
-    const logos = await prisma.logo.findMany({
-      where,
-      orderBy: { createdAt: 'desc' }
-    });
     res.json(logos);
   } catch (err) {
     console.error('Error fetching logos:', err);
@@ -71,16 +79,35 @@ router.post('/upload', authenticateToken, authorizeRoles('ADMIN'), upload.single
     const channelName = req.body.channelName || 'Sony MAX';
     const fileUrl = `/uploads/logos/${req.file.filename}`;
 
-    const newLogo = await prisma.logo.create({
-      data: {
-        channelName,
-        fileName: req.file.originalname,
-        filePath: fileUrl,
-        mimeType: req.file.mimetype,
-        fileSize: req.file.size,
-        uploadedBy: req.user.name || req.user.email
+    let newLogo;
+    try {
+      newLogo = await prisma.logo.create({
+        data: {
+          channelName,
+          fileName: req.file.originalname,
+          filePath: fileUrl,
+          mimeType: req.file.mimetype,
+          fileSize: req.file.size,
+          uploadedBy: req.user.name || req.user.email
+        }
+      });
+    } catch (dbErr) {
+      // Fallback if production database column channelName is missing in prod DB
+      if (dbErr.message && dbErr.message.includes('channelName')) {
+        newLogo = await prisma.logo.create({
+          data: {
+            fileName: req.file.originalname,
+            filePath: fileUrl,
+            mimeType: req.file.mimetype,
+            fileSize: req.file.size,
+            uploadedBy: req.user.name || req.user.email
+          }
+        });
+        newLogo.channelName = channelName;
+      } else {
+        throw dbErr;
       }
-    });
+    }
 
     await logActivity({
       userId: req.user.id,
