@@ -15,6 +15,15 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Auto-ensure channelName column exists in database schema
+(async () => {
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Logo" ADD COLUMN IF NOT EXISTS "channelName" TEXT DEFAULT 'General';`);
+  } catch (err) {
+    console.warn('Auto migration note:', err.message);
+  }
+})();
+
 // Multer Storage setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -41,6 +50,15 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// Helper to ensure DB column exists before query
+const ensureChannelColumnExists = async () => {
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Logo" ADD COLUMN IF NOT EXISTS "channelName" TEXT DEFAULT 'General';`);
+  } catch (e) {
+    // Ignore error if already exists
+  }
+};
+
 // GET /api/logos - List all logos (optional filtering by channel)
 router.get('/', authenticateToken, async (req, res) => {
   try {
@@ -56,11 +74,15 @@ router.get('/', authenticateToken, async (req, res) => {
         orderBy: { createdAt: 'desc' }
       });
     } catch (dbErr) {
-      // Fallback if production database column channelName has not been added via prisma db push yet
+      await ensureChannelColumnExists();
+      const where = {};
+      if (channel && channel !== 'ALL') {
+        where.channelName = channel;
+      }
       logos = await prisma.logo.findMany({
+        where,
         orderBy: { createdAt: 'desc' }
       });
-      logos = logos.map((l) => ({ ...l, channelName: l.channelName || 'General' }));
     }
     res.json(logos);
   } catch (err) {
@@ -92,21 +114,18 @@ router.post('/upload', authenticateToken, authorizeRoles('ADMIN'), upload.single
         }
       });
     } catch (dbErr) {
-      // Fallback if production database column channelName is missing in prod DB
-      if (dbErr.message && dbErr.message.includes('channelName')) {
-        newLogo = await prisma.logo.create({
-          data: {
-            fileName: req.file.originalname,
-            filePath: fileUrl,
-            mimeType: req.file.mimetype,
-            fileSize: req.file.size,
-            uploadedBy: req.user.name || req.user.email
-          }
-        });
-        newLogo.channelName = channelName;
-      } else {
-        throw dbErr;
-      }
+      // Auto-migrate column on the fly if missing in production DB
+      await ensureChannelColumnExists();
+      newLogo = await prisma.logo.create({
+        data: {
+          channelName,
+          fileName: req.file.originalname,
+          filePath: fileUrl,
+          mimeType: req.file.mimetype,
+          fileSize: req.file.size,
+          uploadedBy: req.user.name || req.user.email
+        }
+      });
     }
 
     await logActivity({
