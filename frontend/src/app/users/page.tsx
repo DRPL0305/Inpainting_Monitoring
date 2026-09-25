@@ -24,6 +24,11 @@ export default function UsersPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('inpainting_token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
     const storedUser = localStorage.getItem('inpainting_user');
     if (storedUser) {
       try {

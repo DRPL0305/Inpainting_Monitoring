@@ -81,14 +81,14 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) =>
       data: {
         id,
         title,
-        logoType: logoType || 'Watermark',
-        logoId: logoId || 'LOGO_001',
+        logoType: logoType || null,
+        logoId: logoId || null,
         duration: duration ? parseFloat(duration) : 0,
         status: status || 'PENDING',
         doneTimestamp: doneTimestamp || null,
         filePath: filePath || null,
         fileSize: fileSize || null,
-        resolution: resolution || '1920x1080'
+        resolution: resolution || null
       }
     });
 

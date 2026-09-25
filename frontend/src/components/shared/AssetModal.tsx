@@ -15,8 +15,8 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
   const [formData, setFormData] = useState<Partial<Asset>>({
     id: '',
     title: '',
-    logoType: 'Watermark',
-    logoId: 'LOGO_001',
+    logoType: '',
+    logoId: '',
     duration: 0,
     status: 'PENDING',
     doneTimestamp: ''
@@ -29,8 +29,8 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
       setFormData({
         id: asset.id,
         title: asset.title,
-        logoType: asset.logoType || 'Watermark',
-        logoId: asset.logoId || 'LOGO_001',
+        logoType: asset.logoType || '',
+        logoId: asset.logoId || '',
         duration: asset.duration,
         status: asset.status,
         doneTimestamp: asset.doneTimestamp || ''
@@ -39,8 +39,8 @@ export default function AssetModal({ isOpen, onClose, onSave, asset }: AssetModa
       setFormData({
         id: '',
         title: '',
-        logoType: 'Watermark',
-        logoId: 'LOGO_001',
+        logoType: '',
+        logoId: '',
         duration: 0,
         status: 'PENDING',
         doneTimestamp: ''

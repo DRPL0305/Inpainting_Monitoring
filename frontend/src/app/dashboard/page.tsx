@@ -49,6 +49,11 @@ export default function DashboardPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('inpainting_token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
     const storedUser = localStorage.getItem('inpainting_user');
     if (storedUser) {
       try {
@@ -353,7 +358,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-3.5 px-5 font-mono text-[11px] text-slate-400">
                           <span className="bg-slate-950/60 px-2 py-0.5 rounded border border-slate-800">
-                            {asset.logoId || 'LOGO_001'}
+                            {asset.logoId || '—'}
                           </span>
                         </td>
                         <td className="py-3.5 px-5 text-slate-400 font-mono text-[11px]">

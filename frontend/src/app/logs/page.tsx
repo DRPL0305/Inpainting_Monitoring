@@ -14,6 +14,11 @@ export default function LogsPage() {
   const [actionFilter, setActionFilter] = useState('ALL');
 
   useEffect(() => {
+    const token = localStorage.getItem('inpainting_token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
     fetchLogs();
   }, []);
 

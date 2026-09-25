@@ -30,16 +30,16 @@ model UserAuth {
 model Asset {
   id              String   @id // Asset ID e.g. INP_1001
   title           String
-  logoType        String?  @default("Watermark")
-  logoId          String?  @default("LOGO_001")
+  logoType        String?
+  logoId          String?
   duration        Float    @default(0.0)
   status          String   @default("PENDING") // PENDING, COMPLETED
   doneTimestamp   String?  // Done timestamp string e.g. 2026-09-11 10:30:00
-  language        String   @default("English")
+  language        String?
   exportTimestamp String?  // Export timestamp string e.g. 2026-09-11 11:00:00
   filePath        String?
   fileSize        String?
-  resolution      String?  @default("1920x1080")
+  resolution      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
