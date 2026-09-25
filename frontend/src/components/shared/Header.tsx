@@ -144,88 +144,8 @@ function HeaderContent() {
         </div>
       </div>
 
-      {/* Right: Date Filter, Theme Switcher, Profile Menu */}
+      {/* Right: Theme Switcher, Profile Menu */}
       <div className="flex items-center gap-4">
-        {/* Global Date Filter Popover */}
-        <div className="relative" ref={calendarRef}>
-          <button
-            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            className={`rounded-lg px-3 py-1.5 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-2 border border-slate-800 bg-slate-950/40 hover:border-slate-700 shadow-sm ${
-              fromDate || toDate
-                ? 'text-blue-400 border-blue-500/40 bg-blue-950/20 ring-1 ring-blue-500/30'
-                : isCalendarOpen
-                ? 'bg-slate-900 text-slate-200 border-slate-700'
-                : ''
-            }`}
-            title="Global Date Filter"
-          >
-            <Calendar className="h-4 w-4" />
-            <span className="text-xs font-semibold hidden sm:inline">Filter Dates</span>
-            {(fromDate || toDate) && (
-              <span className="text-[10px] font-bold text-blue-400 bg-blue-950/50 px-1.5 py-0.25 rounded-md border border-blue-500/20">
-                Active
-              </span>
-            )}
-          </button>
-
-          {isCalendarOpen && (
-            <div className="absolute right-0 mt-2.5 w-72 rounded-xl border border-slate-800 bg-slate-900 p-4 shadow-2xl z-50">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Global Date Filter</h4>
-                <button
-                  onClick={() => setIsCalendarOpen(false)}
-                  className="rounded-lg p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors cursor-pointer"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Assigned From</label>
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={handleFromChange}
-                    className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-blue-500/50 cursor-pointer dark:[color-scheme:dark] w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Assigned To</label>
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={handleToChange}
-                    className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-blue-500/50 cursor-pointer dark:[color-scheme:dark] w-full"
-                  />
-                </div>
-
-                <div className="flex items-center gap-1.5 mt-2 border-t border-slate-800 pt-3">
-                  <button
-                    onClick={() => setQuickFilter('today')}
-                    className="flex-1 py-1.5 rounded text-[10px] font-bold transition-all cursor-pointer text-center bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800"
-                  >
-                    Today
-                  </button>
-                  <button
-                    onClick={() => setQuickFilter('yesterday')}
-                    className="flex-1 py-1.5 rounded text-[10px] font-bold transition-all cursor-pointer text-center bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800"
-                  >
-                    Yesterday
-                  </button>
-                  {(fromDate || toDate) && (
-                    <button
-                      onClick={() => setQuickFilter('clear')}
-                      className="px-2 py-1.5 rounded bg-red-950/40 text-red-400 hover:bg-red-950/60 hover:text-red-300 border border-red-900/30 text-[10px] font-bold transition-all cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Theme Switcher */}
         <button

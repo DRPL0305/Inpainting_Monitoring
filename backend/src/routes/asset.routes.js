@@ -13,13 +13,12 @@ router.get('/stats', authenticateToken, async (req, res) => {
     const pendingAssets = await prisma.asset.count({ where: { status: 'PENDING' } });
     const completedAssets = await prisma.asset.count({ where: { status: 'COMPLETED' } });
 
-    // Sum duration of completed assets
-    const completedAssetsList = await prisma.asset.findMany({
-      where: { status: 'COMPLETED' },
+    // Sum duration of ALL assets
+    const allAssetsList = await prisma.asset.findMany({
       select: { duration: true }
     });
-    const totalCompletedSeconds = completedAssetsList.reduce((acc, curr) => acc + (curr.duration || 0), 0);
-    const completedHours = parseFloat((totalCompletedSeconds / 3600).toFixed(2));
+    const totalAllSeconds = allAssetsList.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+    const completedHours = parseFloat((totalAllSeconds / 3600).toFixed(2));
 
     res.json({
       totalAssets,

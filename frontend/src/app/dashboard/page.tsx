@@ -8,6 +8,7 @@ import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import LogoPreviewModal from '@/components/shared/LogoPreviewModal';
 import { Asset, AssetStats, AuthUser } from '@/types';
 import api from '@/services/api';
+import { formatIndianTimestamp } from '@/utils/dateFormatter';
 import {
   Database,
   Clock,
@@ -239,8 +240,8 @@ export default function DashboardPage() {
       iconBg: 'bg-emerald-500/10 border-emerald-500/20',
     },
     {
-      label: 'AMOUNT OF CONTENT HOURS COMPLETED',
-      value: `${stats.completedHours ?? 0} hrs`,
+      label: 'AMOUNT OF CONTENT HOURS',
+      value: `${(assets.reduce((acc, curr) => acc + (curr.duration || 0), 0) / 3600).toFixed(2)} hrs`,
       icon: Clock,
       color: 'text-cyan-400',
       iconBg: 'bg-cyan-500/10 border-cyan-500/20',
@@ -329,20 +330,20 @@ export default function DashboardPage() {
 
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
               {/* Left side: Search input */}
-              <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-[240px]">
+              <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-72 md:w-80 shrink-0">
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search by ID, Title, Blitz AG ID, Logo ID..."
+                  placeholder="Search ID, Title, Blitz AG ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20 transition-all shadow-inner"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -365,7 +366,7 @@ export default function DashboardPage() {
                   </select>
                 </div>
 
-                {/* Logo Present Filter */}
+                {/* Logo Present Filter - Commented out for now
                 <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Logo Present:</span>
                   <select
@@ -378,6 +379,7 @@ export default function DashboardPage() {
                     <option value="NO" className="bg-slate-900 text-rose-400">No (No Logo)</option>
                   </select>
                 </div>
+                */}
 
                 {/* Sort By Selector */}
                 <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
@@ -446,12 +448,14 @@ export default function DashboardPage() {
                     <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setStatusFilter('ALL')} />
                   </span>
                 )}
+                {/* 
                 {logoPresentFilter !== 'ALL' && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     Logo Present: {logoPresentFilter}
                     <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setLogoPresentFilter('ALL')} />
                   </span>
                 )}
+                */}
                 {(sortField !== 'id' || sortDirection !== 'asc') && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     Sorted by: {sortField} ({sortDirection.toUpperCase()})
@@ -501,6 +505,7 @@ export default function DashboardPage() {
                         {renderSortIcon('blitzAgId')}
                       </div>
                     </th>
+                    {/* Logo Present Column Header - Commented out for now
                     <th
                       onClick={() => handleSort('logoPresent')}
                       className="py-3.5 px-4 cursor-pointer hover:text-slate-200 transition-colors select-none group"
@@ -510,6 +515,7 @@ export default function DashboardPage() {
                         {renderSortIcon('logoPresent')}
                       </div>
                     </th>
+                    */}
                     <th
                       onClick={() => handleSort('logoId')}
                       className="py-3.5 px-4 cursor-pointer hover:text-slate-200 transition-colors select-none group"
@@ -551,14 +557,14 @@ export default function DashboardPage() {
                 <tbody className="divide-y divide-slate-800/60">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500">
+                      <td colSpan={7} className="py-12 text-center text-slate-500">
                         <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-500" />
                         <span className="text-xs">Loading inpainting assets...</span>
                       </td>
                     </tr>
                   ) : sortedAssets.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-slate-500 text-xs">
+                      <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
                         No inpainting assets found.
                       </td>
                     </tr>
@@ -577,6 +583,7 @@ export default function DashboardPage() {
                           <td className="py-3 px-4 font-mono text-[11px] text-slate-200 font-semibold">
                             {asset.blitzAgId || (asset as any).blitzagid || '—'}
                           </td>
+                          {/* Logo Present Cell - Commented out for now
                           <td className="py-3 px-4 text-xs font-semibold">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] ${
@@ -588,6 +595,7 @@ export default function DashboardPage() {
                               {asset.logoPresent || (isLogoPresent ? 'Yes' : 'No')}
                             </span>
                           </td>
+                          */}
                           <td className="py-3 px-4 font-mono text-[11px] text-slate-400">
                             {asset.logoId ? (
                               <button
@@ -627,8 +635,8 @@ export default function DashboardPage() {
                               {asset.status === 'COMPLETED' ? 'Completed' : 'Pending'}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-[11px] text-slate-400 font-mono">
-                            {asset.doneTimestamp || <span className="text-slate-600">—</span>}
+                          <td className="py-3 px-4 text-[11px] font-semibold text-slate-300 font-mono whitespace-nowrap">
+                            {asset.doneTimestamp ? formatIndianTimestamp(asset.doneTimestamp) : <span className="text-slate-600">—</span>}
                           </td>
                         </tr>
                       );

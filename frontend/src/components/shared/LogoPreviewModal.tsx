@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Image as ImageIcon, FileText, Calendar, User, Tag, HardDrive, AlertCircle, ExternalLink, Download } from 'lucide-react';
 import { Logo } from '@/types';
 import api from '@/services/api';
+import { formatIndianTimestamp } from '@/utils/dateFormatter';
 
 interface LogoPreviewModalProps {
   isOpen: boolean;
@@ -159,6 +160,18 @@ export default function LogoPreviewModal({ isOpen, logoId, whichLogo, onClose }:
                     {logo.uploadedBy || 'Admin User'}
                   </p>
                 </div>
+
+                {logo.createdAt && (
+                  <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-lg space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Upload Date</span>
+                    </div>
+                    <p className="text-slate-300 font-semibold font-mono text-[11px]">
+                      {formatIndianTimestamp(logo.createdAt)}
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           ) : null}

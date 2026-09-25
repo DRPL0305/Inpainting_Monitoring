@@ -5,7 +5,8 @@ import Sidebar from '@/components/shared/Sidebar';
 import Header from '@/components/shared/Header';
 import { ActivityLog } from '@/types';
 import api from '@/services/api';
-import { FileText, RefreshCw, Activity, Shield, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { FileText, RefreshCw, Activity, Shield, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
+import { formatIndianTimestamp } from '@/utils/dateFormatter';
 
 export default function LogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -118,23 +119,32 @@ export default function LogsPage() {
           </div>
 
           {/* Search + Filters */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-            <div className="relative w-full md:w-80">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-72 md:w-80 shrink-0">
               <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by action, details, user, or asset ID..."
+                placeholder="Search action, details, user..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20 transition-all shadow-inner"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Action Type:</span>
               <select
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
-                className="px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-[11px] font-semibold text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+                className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:border-blue-500/60 cursor-pointer shadow-inner"
               >
                 <option value="ALL">All Actions</option>
                 {uniqueActions.map(action => (
@@ -145,16 +155,16 @@ export default function LogsPage() {
           </div>
 
           {/* Activity Logs Table */}
-          <div className="bg-card border border-card-border rounded-xl overflow-hidden">
+          <div className="bg-card border border-card-border rounded-xl overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-300">
                 <thead className="bg-slate-950/80 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-800">
                   <tr>
-                    <th className="py-3 px-5">Timestamp</th>
-                    <th className="py-3 px-5">User</th>
-                    <th className="py-3 px-5">Role</th>
-                    <th className="py-3 px-5">Action</th>
-                    <th className="py-3 px-5">Details</th>
+                    <th className="py-3.5 px-5">Timestamp</th>
+                    <th className="py-3.5 px-5">User</th>
+                    <th className="py-3.5 px-5">Role</th>
+                    <th className="py-3.5 px-5">Action</th>
+                    <th className="py-3.5 px-5">Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -174,7 +184,7 @@ export default function LogsPage() {
                   ) : (
                     paginatedLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-5 font-mono text-[11px] text-slate-400 whitespace-nowrap">{log.timestamp}</td>
+                        <td className="py-3 px-5 text-[11px] font-semibold text-slate-300 font-mono whitespace-nowrap">{formatIndianTimestamp(log.timestamp)}</td>
                         <td className="py-3 px-5 font-semibold text-slate-200 text-xs">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-[9px] font-bold text-white">
