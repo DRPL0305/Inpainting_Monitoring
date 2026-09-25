@@ -91,6 +91,28 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/logos/:id - Fetch single logo strictly by exact ID
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const rawId = req.params.id.replace(/^logo/i, '');
+    const logoId = parseInt(rawId, 10);
+
+    if (isNaN(logoId)) {
+      return res.status(400).json({ error: 'Invalid logo ID format' });
+    }
+
+    const logo = await prisma.logo.findUnique({ where: { id: logoId } });
+    if (!logo) {
+      return res.status(404).json({ error: `Logo with ID #${req.params.id} is not available in database` });
+    }
+
+    res.json(logo);
+  } catch (err) {
+    console.error('Error fetching logo by id:', err);
+    res.status(500).json({ error: 'Failed to fetch logo details' });
+  }
+});
+
 // POST /api/logos/upload - Upload logo image
 router.post('/upload', authenticateToken, authorizeRoles('ADMIN'), upload.single('logo'), async (req, res) => {
   try {

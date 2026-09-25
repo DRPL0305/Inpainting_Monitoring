@@ -5,7 +5,7 @@ import Sidebar from '@/components/shared/Sidebar';
 import Header from '@/components/shared/Header';
 import { ActivityLog } from '@/types';
 import api from '@/services/api';
-import { FileText, RefreshCw, Activity, Shield, Search } from 'lucide-react';
+import { FileText, RefreshCw, Activity, Shield, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export default function LogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -56,6 +56,14 @@ export default function LogsPage() {
     return 'bg-slate-800 text-slate-300 border-slate-700';
   };
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, actionFilter, itemsPerPage]);
+
   // Get unique actions for filter
   const uniqueActions = Array.from(new Set(logs.map(l => l.action)));
 
@@ -67,6 +75,29 @@ export default function LogsPage() {
     const matchesAction = actionFilter === 'ALL' || log.action === actionFilter;
     return matchesSearch && matchesAction;
   });
+
+  // Pagination calculations
+  const totalEntries = filteredLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalEntries / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalEntries);
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -141,7 +172,7 @@ export default function LogsPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredLogs.map((log) => (
+                    paginatedLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-3 px-5 font-mono text-[11px] text-slate-400 whitespace-nowrap">{log.timestamp}</td>
                         <td className="py-3 px-5 font-semibold text-slate-200 text-xs">
@@ -170,6 +201,104 @@ export default function LogsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Footer Pagination Controls */}
+            <div className="px-5 py-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-950/40">
+              <div className="flex items-center gap-4">
+                <span className="text-[12px] text-slate-400">
+                  Showing{' '}
+                  <span className="font-semibold text-slate-200">
+                    {totalEntries === 0 ? 0 : startIndex + 1}
+                  </span>{' '}
+                  –{' '}
+                  <span className="font-semibold text-slate-200">
+                    {endIndex}
+                  </span>{' '}
+                  of <span className="font-semibold text-slate-200">{totalEntries}</span> entries
+                </span>
+
+                <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
+                  <label htmlFor="itemsPerPageLogs" className="text-xs text-slate-400">
+                    Per page:
+                  </label>
+                  <select
+                    id="itemsPerPageLogs"
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1 focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Navigation Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="First Page"
+                  >
+                    <ChevronsLeft className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Previous Page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center gap-1 px-1">
+                    {getPageNumbers().map((page, idx) =>
+                      page === '...' ? (
+                        <span key={`dots-${idx}`} className="px-1.5 text-xs text-slate-600 select-none">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(Number(page))}
+                          className={`min-w-[28px] h-7 px-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
+                            currentPage === page
+                              ? 'bg-blue-600 border-blue-500 text-white shadow-sm shadow-blue-500/20'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Next Page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Last Page"
+                  >
+                    <ChevronsRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </main>

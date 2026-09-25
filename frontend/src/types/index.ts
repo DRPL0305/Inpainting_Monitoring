@@ -27,6 +27,9 @@ export interface Asset {
   filePath?: string | null;
   fileSize?: string | null;
   resolution?: string | null;
+  blitzAgId?: string | null;
+  logoPresent?: string | null;
+  whichLogo?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

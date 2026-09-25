@@ -47,7 +47,9 @@ router.get('/', authenticateToken, async (req, res) => {
         { id: { contains: search, mode: 'insensitive' } },
         { title: { contains: search, mode: 'insensitive' } },
         { logoType: { contains: search, mode: 'insensitive' } },
-        { logoId: { contains: search, mode: 'insensitive' } }
+        { logoId: { contains: search, mode: 'insensitive' } },
+        { blitzAgId: { contains: search, mode: 'insensitive' } },
+        { whichLogo: { contains: search, mode: 'insensitive' } }
       ];
     }
 
@@ -56,7 +58,14 @@ router.get('/', authenticateToken, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    res.json(assets);
+    const mappedAssets = assets.map((a) => ({
+      ...a,
+      blitzAgId: a.blitzAgId || a.blitzagid || a.blitz_ag_id || null,
+      logoPresent: a.logoPresent || a.logopresent || null,
+      whichLogo: a.whichLogo || a.whichlogo || null
+    }));
+
+    res.json(mappedAssets);
   } catch (err) {
     console.error('Error fetching assets:', err);
     res.status(500).json({ error: 'Failed to fetch assets' });
@@ -66,7 +75,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/assets - Create new Asset
 router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
   try {
-    const { id, title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution } = req.body;
+    const { id, title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution, blitzAgId, logoPresent, whichLogo } = req.body;
 
     if (!id || !title) {
       return res.status(400).json({ error: 'Asset ID and title are required' });
@@ -88,7 +97,10 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) =>
         doneTimestamp: doneTimestamp || null,
         filePath: filePath || null,
         fileSize: fileSize || null,
-        resolution: resolution || null
+        resolution: resolution || null,
+        blitzAgId: blitzAgId || null,
+        logoPresent: logoPresent || null,
+        whichLogo: whichLogo || null
       }
     });
 
@@ -111,7 +123,7 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req, res) =>
 router.patch('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution } = req.body;
+    const { title, logoType, logoId, duration, status, doneTimestamp, filePath, fileSize, resolution, blitzAgId, logoPresent, whichLogo } = req.body;
 
     const existing = await prisma.asset.findUnique({ where: { id } });
     if (!existing) {
@@ -128,6 +140,9 @@ router.patch('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req, res
     if (filePath !== undefined) updatedData.filePath = filePath;
     if (fileSize !== undefined) updatedData.fileSize = fileSize;
     if (resolution !== undefined) updatedData.resolution = resolution;
+    if (blitzAgId !== undefined) updatedData.blitzAgId = blitzAgId;
+    if (logoPresent !== undefined) updatedData.logoPresent = logoPresent;
+    if (whichLogo !== undefined) updatedData.whichLogo = whichLogo;
 
     // Auto set timestamps if status changed to COMPLETED and timestamp not provided
     if (status === 'COMPLETED' && !updatedData.doneTimestamp && !existing.doneTimestamp) {

@@ -33,6 +33,7 @@ app.use('/api/logos', logoRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/logs', logRoutes);
 
+// Server updated: 2026-09-25
 app.listen(PORT, () => {
   console.log(`🚀 Inpainting Monitoring Server running on port ${PORT}`);
 });
