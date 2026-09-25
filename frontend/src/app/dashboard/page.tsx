@@ -223,6 +223,17 @@ export default function DashboardPage() {
     return pages;
   };
 
+  const totalContentSeconds = assets.length > 0
+    ? assets.reduce((acc, curr) => acc + (curr.duration || 0), 0)
+    : Math.round((stats.completedHours || 0) * 3600);
+
+  const formatHoursAndMinutes = (totalSecs: number) => {
+    if (!totalSecs || totalSecs <= 0) return '0h 0m';
+    const hrs = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    return `${hrs.toLocaleString()}h ${mins}m`;
+  };
+
   // Top 3 Metric Cards config
   const statCards = [
     {
@@ -241,7 +252,7 @@ export default function DashboardPage() {
     },
     {
       label: 'AMOUNT OF CONTENT HOURS',
-      value: `${(assets.reduce((acc, curr) => acc + (curr.duration || 0), 0) / 3600).toFixed(2)} hrs`,
+      value: formatHoursAndMinutes(totalContentSeconds),
       icon: Clock,
       color: 'text-cyan-400',
       iconBg: 'bg-cyan-500/10 border-cyan-500/20',
