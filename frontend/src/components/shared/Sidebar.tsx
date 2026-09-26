@@ -20,13 +20,28 @@ interface SidebarItem {
 export default function Sidebar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  const navItems: SidebarItem[] = [
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('inpainting_user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUserRole(parsed.role);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const allNavItems: (SidebarItem & { adminOnly?: boolean })[] = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Logo Tab', href: '/logos', icon: ImageIcon },
-    { name: 'Users', href: '/users', icon: Users },
-    { name: 'Activity Logs', href: '/logs', icon: FileText },
+    { name: 'Users', href: '/users', icon: Users, adminOnly: true },
+    { name: 'Activity Logs', href: '/logs', icon: FileText, adminOnly: true },
   ];
+
+  const navItems = allNavItems.filter((item) => !item.adminOnly || userRole === 'ADMIN');
 
   return (
     <aside className="fixed bottom-0 left-0 top-0 z-30 flex w-20 flex-col items-center border-r border-card-border bg-card py-6">

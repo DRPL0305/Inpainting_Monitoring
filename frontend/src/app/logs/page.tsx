@@ -20,6 +20,18 @@ export default function LogsPage() {
       window.location.href = '/login';
       return;
     }
+    const storedUser = localStorage.getItem('inpainting_user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed.role !== 'ADMIN') {
+          window.location.href = '/dashboard';
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
     fetchLogs();
   }, []);
 

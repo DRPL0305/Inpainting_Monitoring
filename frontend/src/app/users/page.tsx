@@ -69,7 +69,12 @@ export default function UsersPage() {
     const storedUser = localStorage.getItem('inpainting_user');
     if (storedUser) {
       try {
-        setCurrentUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setCurrentUser(parsed);
+        if (parsed.role !== 'ADMIN') {
+          window.location.href = '/dashboard';
+          return;
+        }
       } catch (e) {
         console.error(e);
       }
