@@ -5,6 +5,9 @@ import Providers from './providers';
 export const metadata: Metadata = {
   title: 'Inpainting Monitoring Dashboard',
   description: 'Inpainting monitoring pipeline and asset tracking dashboard.',
+  icons: {
+    icon: '/icon.png',
+  },
 };
 
 export default function RootLayout({
