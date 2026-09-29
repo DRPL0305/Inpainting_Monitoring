@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -7,10 +9,10 @@
   --card: #ffffff;
   --card-border: #e2e8f0;
   
-  --slate-950: #ffffff;
-  --slate-900: #f1f5f9;
-  --slate-800: #e2e8f0;
-  --slate-700: #cbd5e1;
+  --slate-950: #f8fafc;
+  --slate-900: #ffffff;
+  --slate-800: #f1f5f9;
+  --slate-700: #e2e8f0;
   --slate-600: #94a3b8;
   --slate-500: #64748b;
   --slate-400: #475569;
@@ -18,9 +20,9 @@
   --slate-200: #1e293b;
   --slate-100: #0f172a;
   
-  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-shadow: rgba(0, 0, 0, 0.06);
+  --glass-shadow: rgba(0, 0, 0, 0.04);
 }
 
 .dark, html.dark {
@@ -114,8 +116,8 @@
   .dark input:-webkit-autofill:hover,
   .dark input:-webkit-autofill:focus,
   .dark input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--slate-950) inset !important;
-    -webkit-text-fill-color: var(--slate-100) !important;
+    -webkit-box-shadow: 0 0 0 1000px #1e293b inset !important;
+    -webkit-text-fill-color: #ffffff !important;
   }
 }
 

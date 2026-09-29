@@ -131,6 +131,15 @@ function HeaderContent() {
     return 'Dashboard';
   };
 
+  const toggleTheme = () => {
+    const isCurrentlyDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+    setTheme(isCurrentlyDark ? 'light' : 'dark');
+  };
+
+  const isDarkTheme = mounted
+    ? (resolvedTheme === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')))
+    : true;
+
   return (
     <header className="fixed left-20 right-0 top-0 z-20 flex h-16 items-center justify-between border-b border-card-border bg-card/80 px-6 backdrop-blur-md">
       {/* Left: Breadcrumbs */}
@@ -150,13 +159,13 @@ function HeaderContent() {
 
         {/* Theme Switcher */}
         <button
-          onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
+          onClick={toggleTheme}
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer"
           title="Toggle Theme"
         >
           {!mounted ? (
             <div className="h-4.5 w-4.5" />
-          ) : currentTheme === 'dark' ? (
+          ) : isDarkTheme ? (
             <Sun className="h-4.5 w-4.5 text-amber-400" />
           ) : (
             <Moon className="h-4.5 w-4.5 text-slate-600" />
