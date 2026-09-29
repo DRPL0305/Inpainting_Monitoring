@@ -103,7 +103,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="login-input w-full px-3.5 py-2.5 bg-white border border-[#cbd5e1] rounded-xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
+                  className="login-input w-full px-3.5 py-2.5 bg-white border border-[#cbd5e1] rounded-xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] caret-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
-                    className="login-input w-full px-3.5 py-2.5 pr-10 bg-white border border-[#cbd5e1] rounded-xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
+                    className="login-input w-full px-3.5 py-2.5 pr-10 bg-white border border-[#cbd5e1] rounded-xl text-sm text-[#0f172a] placeholder:text-[#94a3b8] caret-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
                   />
                   <button
                     type="button"

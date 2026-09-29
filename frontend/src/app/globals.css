@@ -124,11 +124,17 @@
     -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
     -webkit-text-fill-color: #0f172a !important;
     color: #0f172a !important;
+    caret-color: #2563eb !important;
   }
 
   .login-input {
     background-color: #ffffff !important;
     color: #0f172a !important;
+    caret-color: #2563eb !important;
+  }
+
+  .login-input:focus {
+    caret-color: #2563eb !important;
   }
 }
 
