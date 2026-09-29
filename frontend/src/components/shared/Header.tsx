@@ -22,7 +22,8 @@ function HeaderContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const currentTheme = theme === 'system' ? resolvedTheme : theme;
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -149,16 +150,16 @@ function HeaderContent() {
 
         {/* Theme Switcher */}
         <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="rounded-lg p-2 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-colors cursor-pointer"
+          onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
+          className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer"
           title="Toggle Theme"
         >
           {!mounted ? (
             <div className="h-4.5 w-4.5" />
-          ) : theme === 'dark' ? (
-            <Sun className="h-4.5 w-4.5" />
+          ) : currentTheme === 'dark' ? (
+            <Sun className="h-4.5 w-4.5 text-amber-400" />
           ) : (
-            <Moon className="h-4.5 w-4.5" />
+            <Moon className="h-4.5 w-4.5 text-slate-600" />
           )}
         </button>
 

@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #070b13;
-  --foreground: #f1f5f9;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   
-  --card: #0b1324;
-  --card-border: #1e293b;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
   
-  --slate-950: #070b13;
-  --slate-900: #0b1324;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-600: #475569;
+  --slate-950: #ffffff;
+  --slate-900: #f1f5f9;
+  --slate-800: #e2e8f0;
+  --slate-700: #cbd5e1;
+  --slate-600: #94a3b8;
   --slate-500: #64748b;
-  --slate-400: #94a3b8;
-  --slate-300: #cbd5e1;
-  --slate-200: #e2e8f0;
-  --slate-100: #f1f5f9;
+  --slate-400: #475569;
+  --slate-300: #334155;
+  --slate-200: #1e293b;
+  --slate-100: #0f172a;
   
-  --glass-bg: rgba(11, 19, 36, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --glass-shadow: rgba(0, 0, 0, 0.37);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.06);
 }
 
-.dark {
+.dark, html.dark {
   --background: #070b13;
   --foreground: #f1f5f9;
   
@@ -105,9 +105,17 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #f8fafc inset !important;
+    -webkit-text-fill-color: #0f172a !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px var(--slate-950) inset !important;
     -webkit-text-fill-color: var(--slate-100) !important;
-    transition: background-color 5000s ease-in-out 0s;
   }
 }
 
